@@ -1,0 +1,16 @@
+HiveWatch Network Isolation Evidence
+Date: 2026-10-09T19:33:12+05:30
+
+External TCP connectivity test:
+Command: bash TCP connection test to 1.1.1.1:443 (5-second timeout)
+Result: PASS - external TCP connection blocked or unreachable
+
+Internal Cowrie reachability test:
+Command: bash TCP connection test to cowrie:2222 (5-second timeout)
+Result: PASS - Cowrie port 2222 reachable
+
+Network configuration:
+Docker Compose lab network uses internal: true.
+
+Note: The external test checks one endpoint; it does not independently
+prove that every possible external destination is unreachable.

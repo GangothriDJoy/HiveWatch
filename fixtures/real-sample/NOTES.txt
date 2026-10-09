@@ -1,0 +1,23 @@
+HiveWatch Member 4 - Real Sample
+Date: 2026-10-09
+
+Environment:
+- Cowrie honeypot running in Docker container cowrie-test.
+- SSH test client running in a temporary Alpine container.
+- Containers connected through the isolated hw-test Docker network.
+- Target: cowrie-test:2222
+- SSH username: root
+
+Test results:
+- Two manual SSH sessions completed successfully.
+- PCAP contains 90 packets.
+- Distinct client ports: 2.
+- Cowrie sessions found in PCAP: 2.
+- Sessions missing from PCAP: 0.
+- Validation result: PASS.
+
+Files:
+- sample.pcap: captured network traffic.
+- cowrie.json: Cowrie activity log.
+
+These files were generated during a local test of the HiveWatch project.

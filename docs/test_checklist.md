@@ -41,3 +41,23 @@ Use `capture/check_pcap.sh data/pcap/<file>.pcap data/cowrie/cowrie.json` for th
 (Write them here as you find them. They go into the report.)
 
 -
+
+## E. Standalone Member 4 test
+
+Date: 2026-10-09
+Environment: Docker, Cowrie, tcpdump, isolated hw-test network.
+
+| Check | Result | Notes |
+|---|---|---|
+| Cowrie container starts | PASS | SSH service listening on port 2222 |
+| Capture container starts | PASS | tcpdump listening on eth0 |
+| Manual SSH scenario | PASS | Two successful sessions |
+| PCAP readable | PASS | 90 packets captured |
+| Cowrie sessions matched to PCAP | PASS | 2 of 2 found |
+| Missing sessions | PASS | 0 missing |
+| Packet loss | PASS | 0 packets dropped by kernel |
+
+Validation command:
+`bash capture/check_pcap.sh fixtures/real-sample/sample.pcap fixtures/real-sample/cowrie.json`
+
+Validation result: PASS.

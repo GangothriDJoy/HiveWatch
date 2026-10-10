@@ -54,3 +54,20 @@ Use `capture/check_pcap.sh data/pcap/<file>.pcap data/cowrie/cowrie.json` for th
 | Overall validation | PASS | `capture/check_pcap.sh` passed |
 
 **Note:** Fixed client-port extraction in `capture/check_pcap.sh` to handle the `LINUX_SLL2` `tcpdump` output format.
+
+## F. Full demo run — 10 October 2026
+
+| Check | Result | Notes |
+|---|---|---|
+| Full demo script | PASS | `scripts/run_demo.sh` completed all 8 stages |
+| Randomizer | PASS | Selected `HP_HOSTNAME=test-machine` and `HP_BANNER=SSH-2.0-OpenSSH_9.3p2` |
+| Nmap scenario | PASS | Scenario exited normally; 1 matched Cowrie session |
+| Hydra scenario | PASS | Scenario reported `hydra_exit=0`; 3 matched Cowrie sessions |
+| Manual SSH scenario | PASS | `ssh_exit=0`; 1 matched session; 5 commands recorded |
+| PCAP capture | PASS | `data/pcap/hw-20261010-130318.pcap`; 29,265 bytes |
+| Cowrie JSON log | PASS | `data/cowrie/cowrie.json`; 44 events reported by demo |
+| Correlation | PASS | 6 matched, 0 partial, 0 unmatched; 1 older session outside the PCAP time range was skipped |
+| Evidence saved | PASS | Session table and sessions JSON/CSV generated |
+| Permission warning | NOTE | `chmod` printed `Operation not permitted`, but the demo continued and Cowrie JSON logging succeeded |
+
+**Run notes:** Two captured connections had no corresponding Cowrie session. The correlator identified these as possible port probes or scans that did not complete an SSH handshake. The demo completed despite the permission warning; investigate the warning separately.

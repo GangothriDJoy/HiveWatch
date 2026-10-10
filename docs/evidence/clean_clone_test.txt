@@ -1,0 +1,19 @@
+HiveWatch clean-clone test
+Date: 10 October 2026
+Time: 14:30 UTC
+Repository: ~/HiveWatch-clean-test
+
+Result: PASS
+- Fresh clone configured with a separate Python virtual environment.
+- Compose configuration adjusted locally to avoid fixed container and network name conflicts with the original repository.
+- Cowrie, capture, and attacker containers started successfully.
+- Nmap scan completed; SSH port 2222 was open.
+- Hydra scenario completed with hydra_exit=0.
+- Manual SSH completed with ssh_exit=0; five commands recorded.
+- PCAP: data/pcap/hw-20261010-143029.pcap (29,789 bytes).
+- Cowrie log: 31 lines.
+- Correlation: 6 matched, 0 partial, 0 unmatched.
+- Three captured connections had no corresponding Cowrie session.
+- Capture warning: promiscuous mode is unsupported on the "any" interface; capture completed successfully.
+
+Note: This test required local Compose changes because the original configuration uses fixed container names and a fixed network name.

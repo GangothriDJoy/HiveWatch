@@ -1,0 +1,9 @@
+session       src_ip          port   fails cmds pkts  status
+------------------------------------------------------------
+973ffed62865  172.18.0.2      41592  0     0    6     matched
+ba4306292736  172.18.0.2      41602  0     0    22    matched
+ea9baf407d05  172.18.0.2      41610  0     0    23    matched
+47ea6d970770  172.18.0.2      41626  1     0    22    matched
+e93fb98b4723  172.18.0.2      41642  0     5    47    matched
+
+Summary: 5 matched, 0 partial, 0 unmatched  (1 older session(s) outside this pcap's time range were skipped)

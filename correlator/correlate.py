@@ -126,10 +126,14 @@ def filter_to_pcap_range(sessions, flows, window):
 
 # ---------- 3. Matching ----------
 def correlate(sessions, flows, window):
+    """Returns (records, used_flow_keys). used_flow_keys = pcap flows claimed by a session."""
     out = []
+    used = set()
     for s in sessions:
         key = (s["src_ip"], s["src_port"], s["dst_port"])
         fl = flows.get(key)
+        if fl:
+            used.add(key)
         status, packets, nbytes = "unmatched", 0, 0
         if fl and s["start"] is not None and abs(fl["first"] - s["start"]) <= window:
             status = "matched"
@@ -143,6 +147,7 @@ def correlate(sessions, flows, window):
                      and abs(v["first"] - s["start"]) <= window]
             if cands:
                 fl = cands[0][1]
+                used.add(cands[0][0])
                 status = "partial"
         if fl:
             packets, nbytes = fl["packets"], fl["bytes"]
@@ -166,7 +171,23 @@ def correlate(sessions, flows, window):
         })
         if status != "matched":
             print(f"[warn] session {s['session_id']} is {status}", file=sys.stderr)
-    return out
+    return out, used
+
+
+def pcap_only_flows(flows, used):
+    """Connections to the honeypot port that appear in the pcap but have no Cowrie session
+    (for example a port probe that never completed an SSH handshake)."""
+    rows = []
+    for (ip, sport, dport), f in sorted(flows.items(), key=lambda kv: kv[1]["first"]):
+        if (ip, sport, dport) in used:
+            continue
+        rows.append({
+            "src_ip": ip, "src_port": sport, "dst_port": dport,
+            "start": datetime.fromtimestamp(f["first"], timezone.utc).isoformat(),
+            "duration": round(f["last"] - f["first"], 3),
+            "packets": f["packets"], "bytes": f["bytes"],
+        })
+    return rows
 
 
 def write_outputs(records, out_dir):
@@ -211,13 +232,21 @@ def main():
     skipped = 0
     if not a.all_sessions:
         sessions, skipped = filter_to_pcap_range(sessions, flows, a.window)
-    records = correlate(sessions, flows, a.window)
+    records, used = correlate(sessions, flows, a.window)
+    extra = pcap_only_flows(flows, used)
     write_outputs(records, a.out)
+    Path(a.out, "pcap_only.json").write_text(json.dumps(extra, indent=2), encoding="utf-8")
     print_table(records)
     counts = {k: sum(1 for r in records if r["status"] == k) for k in ("matched", "partial", "unmatched")}
     print(f"\nSummary: {counts['matched']} matched, {counts['partial']} partial, "
           f"{counts['unmatched']} unmatched"
           + (f"  ({skipped} older session(s) outside this pcap's time range were skipped)" if skipped else ""))
+    if extra:
+        print(f"\nConnections in the pcap with NO Cowrie session: {len(extra)}  "
+              "(for example port probes or scans that never completed an SSH handshake)")
+        for r in extra:
+            print(f"  {r['src_ip']}:{r['src_port']} -> :{r['dst_port']}   "
+                  f"{r['packets']} packets, {r['bytes']} bytes, {r['duration']} s")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,55 @@
+services:
+  cowrie:
+    image: cowrie/cowrie:latest
+    container_name: hivewatch-cowrie
+    environment:
+      COWRIE_HONEYPOT_HOSTNAME: ${HP_HOSTNAME:-svr04}
+      COWRIE_SSH_VERSION: "${HP_BANNER:-SSH-2.0-OpenSSH_9.2p1 Debian-2+deb12u3}"
+    volumes:
+      - ./data/cowrie:/cowrie/cowrie-git/var/log/cowrie
+    networks:
+      - lab
+    restart: unless-stopped
+
+  capture:
+    image: nicolaka/netshoot:latest
+    container_name: hivewatch-capture
+    network_mode: "service:cowrie"
+    depends_on:
+      - cowrie
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+    volumes:
+      - ./data/pcap:/pcap
+    command:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /pcap
+        FILE="/pcap/hw-$$(date -u +%Y%m%d-%H%M%S).pcap"
+        echo "Capturing TCP port 2222 to $$FILE"
+        exec tcpdump -i any -U -nn -s 0 -w "$$FILE" 'tcp port 2222'
+    restart: unless-stopped
+
+  attacker:
+    build:
+      context: ./attacker
+      dockerfile: Dockerfile
+    container_name: hivewatch-attacker
+    environment:
+      TARGET_HOST: cowrie
+      TARGET_PORT: "2222"
+    volumes:
+      - ./attacker/scenarios:/scenarios:ro
+    networks:
+      - lab
+    stdin_open: true
+    tty: true
+    command: ["sleep", "infinity"]
+    restart: unless-stopped
+
+networks:
+  lab:
+    name: hivewatch-lab
+    internal: true

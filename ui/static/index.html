@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HiveWatch control room</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#run" aria-label="HiveWatch home">
+    <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><polygon points="16,2 28,9 28,23 16,30 4,23 4,9" fill="none" stroke="var(--honey)" stroke-width="2"/><polygon points="16,9 22,12.5 22,19.5 16,23 10,19.5 10,12.5" fill="var(--honey)"/></svg>
+    <span>HiveWatch</span>
+  </a>
+  <nav aria-label="Sections">
+    <a href="#run" data-view="run">Run</a>
+    <a href="#identity" data-view="identity">Identity</a>
+    <a href="#sessions" data-view="sessions">Sessions</a>
+    <a href="#evidence" data-view="evidence">Evidence</a>
+  </nav>
+  <div class="chips" id="labchips" aria-live="polite"></div>
+</header>
+
+<main>
+<!-- ============================ RUN ============================ -->
+<section id="view-run" class="view">
+  <div class="intro">
+    <h1>An SSH trap that changes its face</h1>
+    <p>HiveWatch is a fake server that attackers think is real. Run the demo to watch it get attacked, then see exactly who did what.</p>
+  </div>
+
+  <div class="panel hero">
+    <div class="hero-head">
+      <div>
+        <h2 id="runtitle">Ready to run</h2>
+        <p id="runsub" class="muted">One click starts the whole lab, attacks it, and matches what the honeypot saw with what the network saw.</p>
+      </div>
+      <div class="actions">
+        <button id="runbtn" class="btn primary">Run demo</button>
+        <button id="resetbtn" class="btn ghost small">Stop and reset lab</button>
+      </div>
+    </div>
+    <ol class="chain" id="chain"></ol>
+    <p id="stepnote" class="stepnote muted"></p>
+  </div>
+
+  <details class="notes"><summary>Presenter notes</summary>
+    <p>HiveWatch is an SSH honeypot that changes how it looks to attackers. This page runs the whole prototype with one click.</p>
+    <p>Step 4 is three attacks: a port scan, password guessing, and a manual login that types five commands. They come from a separate attacker machine inside a closed network.</p>
+    <p>Two recordings are made at the same time: the honeypot's own log and a full packet capture. The Sessions page shows how they are joined.</p>
+  </details>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>What the attacker sees right now</h3>
+      <dl class="kv" id="identity"></dl>
+      <p class="muted small">Each run picks a new hostname and SSH version, so a scanner that fingerprinted the honeypot yesterday sees a different machine today.</p>
+    </div>
+    <div class="panel">
+      <h3>Lab</h3>
+      <ul class="lab" id="lab"></ul>
+      <p class="muted small">The lab network is closed. Nothing in it can reach the internet.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="rowhead"><h3>Live log</h3><button class="btn ghost small" id="logtoggle">Hide</button></div>
+    <pre id="log" class="log" tabindex="0" aria-live="off"><span class="muted">Nothing running yet.</span></pre>
+  </div>
+</section>
+
+<!-- ============================ IDENTITY ============================ -->
+<section id="view-identity" class="view" hidden>
+  <div class="intro">
+    <h1>Same honeypot, different face</h1>
+    <p>Attackers recognise servers by what they announce. Compare what a scanner reads before and after HiveWatch picks a new identity.</p>
+  </div>
+  <div class="panel hero">
+    <div class="hero-head">
+      <div>
+        <h2 id="cmptitle">Ready to compare</h2>
+        <p id="cmpsub" class="muted">Starts the honeypot, scans it, changes its identity, restarts it and scans it again. It resets the lab, so run it before the full demo, not during it.</p>
+      </div>
+      <button id="cmpbtn" class="btn primary">Compare identities</button>
+    </div>
+    <ol class="chain five" id="cmpchain"></ol>
+  </div>
+  <div id="cmp-empty" class="panel empty"><h2>No comparison yet</h2><p>Run the comparison to see the two scans side by side.</p></div>
+  <div id="cmp-body" hidden>
+    <div class="grid2" id="cmpcards"></div>
+    <div class="panel"><div class="tabs" id="cmptabs" role="tablist"></div><pre id="cmpraw" class="log"></pre></div>
+  </div>
+  <details class="notes"><summary>Presenter notes</summary>
+    <p>A scanner like Nmap asks the SSH service to announce its software and version. Real attackers use that to decide what to try.</p>
+    <p>Left is the honeypot with its original identity. Right is the same honeypot after the randomizer picked a new SSH version and hostname. Nothing else changed.</p>
+    <p>Because the identity keeps moving, a fingerprint taken yesterday no longer matches today.</p>
+  </details>
+</section>
+
+<!-- ============================ SESSIONS ============================ -->
+<section id="view-sessions" class="view" hidden>
+  <div class="intro">
+    <h1>Who did what</h1>
+    <p id="sess-sub">Every login attempt the honeypot recorded, linked to the network packets it came from.</p>
+  </div>
+  <details class="notes"><summary>Presenter notes</summary>
+    <p>The honeypot knows what the attacker typed but not the network detail. The packet capture knows the traffic but not the commands. Neither is complete alone.</p>
+    <p>The correlator joins them using source address, source port and time. Match means a session and a network conversation are the same event.</p>
+    <p>The panel on the right lists connections that only the network recording saw, such as the port scan. That is the value of having both.</p>
+  </details>
+  <div id="sess-empty" class="panel empty" hidden>
+    <h2>No results yet</h2>
+    <p>Run the demo first. Results appear here when it finishes.</p>
+    <a class="btn primary" href="#run">Go to Run</a>
+  </div>
+  <div id="sess-body" hidden>
+    <div class="tiles" id="tiles"></div>
+    <div class="panel">
+      <h3>Sessions</h3>
+      <div class="tablewrap">
+        <table id="sessions">
+          <thead><tr><th>Session</th><th>Attack</th><th>Source port</th><th>Failed logins</th><th>Commands</th><th>Packets</th><th>Match</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="muted small">Match means the honeypot's record of the session lines up with a conversation in the packet capture, by source address, source port and time.</p>
+    </div>
+    <div class="grid2">
+      <div class="panel"><h3>By attack</h3><div id="perscen"></div></div>
+      <div class="panel"><h3>Seen on the network, not in the honeypot</h3><div id="pcaponly"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ EVIDENCE ============================ -->
+<section id="view-evidence" class="view" hidden>
+  <div class="intro">
+    <h1>Evidence</h1>
+    <p>The raw output of each attack and the files from the last run.</p>
+  </div>
+  <div class="panel">
+    <div class="tabs" id="logtabs" role="tablist"></div>
+    <pre id="evlog" class="log"><span class="muted">Run the demo to collect evidence.</span></pre>
+  </div>
+  <div class="panel">
+    <h3>Downloads</h3>
+    <div class="dl">
+      <a class="btn ghost" href="/api/download/sessions.csv">Sessions (CSV)</a>
+      <a class="btn ghost" href="/api/download/sessions.json">Sessions (JSON)</a>
+      <a class="btn ghost" href="/api/download/pcap_only.json">Network-only connections (JSON)</a>
+    </div>
+    <p class="muted small" id="pcapnote"></p>
+  </div>
+</section>
+</main>
+<script src="/static/app.js"></script>
+</body>
+</html>

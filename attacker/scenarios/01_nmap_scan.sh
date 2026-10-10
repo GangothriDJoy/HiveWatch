@@ -16,7 +16,7 @@ mkdir -p "$EVIDENCE_DIR"
     echo "========================================"
     echo "Scan label: $LABEL"
     echo "Date: $(date -Is)"
-    echo "Target: 127.0.0.1, port 2222"
+    echo "Target: cowrie, port 2222"
     echo "========================================"
 
     nmap -n -sV -p 2222 cowrie

@@ -71,3 +71,20 @@ Use `capture/check_pcap.sh data/pcap/<file>.pcap data/cowrie/cowrie.json` for th
 | Permission warning | NOTE | `chmod` printed `Operation not permitted`, but the demo continued and Cowrie JSON logging succeeded |
 
 **Run notes:** Two captured connections had no corresponding Cowrie session. The correlator identified these as possible port probes or scans that did not complete an SSH handshake. The demo completed despite the permission warning; investigate the warning separately.
+
+## G. Full demo run 2 — 10 October 2026
+
+| Check | Result | Notes |
+|---|---|---|
+| Full demo script | PASS | All 8 stages completed |
+| Directory permission warning | PASS | No `chmod` warning after setting `data/cowrie` to mode 777 |
+| Randomizer | PASS | Selected `HP_HOSTNAME=dev-gateway` and `HP_BANNER=SSH-2.0-OpenSSH_8.4p1 Ubuntu-5ubuntu1` |
+| Nmap scenario | PASS | 1 matched Cowrie session; randomized SSH banner detected |
+| Hydra scenario | PASS | `hydra_exit=0`; 3 matched Cowrie sessions |
+| Manual SSH scenario | PASS | `ssh_exit=0`; 1 matched session; 5 commands recorded |
+| PCAP capture | PASS | `data/pcap/hw-20261010-131606.pcap`; 29,433 bytes |
+| Cowrie JSON log | PASS | `data/cowrie/cowrie.json`; 75 events reported by demo |
+| Correlation | PASS | 6 matched, 0 partial, 0 unmatched; 7 older sessions outside the PCAP time range were skipped |
+| Evidence saved | PASS | Session table and sessions JSON/CSV generated |
+
+**Run notes:** Two captured connections had no corresponding Cowrie session. The tcpdump warning about promiscuous mode on the `any` interface remained; capture and correlation still completed successfully.

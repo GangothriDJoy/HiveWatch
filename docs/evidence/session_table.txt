@@ -1,13 +1,13 @@
 session       src_ip          port   fails cmds pkts  status     scenario
 -------------------------------------------------------------------------
-3e34054c9002  172.19.0.2      44506  0     0    6     matched    -
-3a105996600a  172.19.0.2      44512  0     0    8     matched    01_nmap_scan.sh
-61a136cfe6e0  172.19.0.2      44518  0     0    22    matched    02_hydra_bruteforce.sh
-80935724131f  172.19.0.2      44526  0     0    23    matched    02_hydra_bruteforce.sh
-0bfcbb208004  172.19.0.2      44540  1     0    22    matched    02_hydra_bruteforce.sh
-0647cc0dea90  172.19.0.2      44554  0     5    47    matched    03_manual_ssh.sh
+65d11387c337  172.19.0.3      50198  0     0    7     matched    -
+c8fb566aa492  172.19.0.3      50208  0     0    8     matched    01_nmap_scan.sh
+468196dc3df9  172.19.0.3      50218  0     0    22    matched    02_hydra_bruteforce.sh
+da6badc0cde0  172.19.0.3      50234  1     0    22    matched    02_hydra_bruteforce.sh
+99ca9bbdd2c4  172.19.0.3      50230  0     0    23    matched    02_hydra_bruteforce.sh
+5a3b73646935  172.19.0.3      50248  0     5    47    matched    03_manual_ssh.sh
 
-Summary: 6 matched, 0 partial, 0 unmatched  (1 older session(s) outside this pcap's time range were skipped)
+Summary: 6 matched, 0 partial, 0 unmatched  (7 older session(s) outside this pcap's time range were skipped)
 
 Per scenario:
   01_nmap_scan.sh            1 session(s): 1 matched, 0 partial, 0 unmatched; 0 command(s); 1 connection(s) with no Cowrie session
@@ -16,5 +16,5 @@ Per scenario:
   (not inside any scenario window: 1 session(s))
 
 Connections in the pcap with NO Cowrie session: 2  (for example port probes or scans that never completed an SSH handshake)
-  172.19.0.2:44494 -> :2222   2 packets, 140 bytes, 0.0 s
-  172.19.0.2:60915 -> :2222   3 packets, 188 bytes, 0.0 s
+  172.19.0.3:56150 -> :2222   2 packets, 140 bytes, 0.0 s
+  172.19.0.3:36290 -> :2222   3 packets, 188 bytes, 0.0 s

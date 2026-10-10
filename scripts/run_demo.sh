@@ -56,12 +56,13 @@ say "4/8  Run attack scenarios (from inside the lab network)"
 shopt -s nullglob
 scenarios=(attacker/scenarios/[0-9]*.sh)
 [ "${#scenarios[@]}" -gt 0 ] || die "no scenario scripts found in attacker/scenarios/"
+mkdir -p data/out/scenario_logs
 : > data/out/scenarios.jsonl     # start/end time of every scenario, so results can be labelled
 for s in "${scenarios[@]}"; do
   n="$(basename "$s")"
   echo "-- $n"
   t0="$(date +%s.%N)"
-  docker compose exec -T attacker "/scenarios/$n" || echo "   [warn] $n exited with an error; continuing"
+  docker compose exec -T attacker "/scenarios/$n" 2>&1 | tee "data/out/scenario_logs/${n%.sh}.txt" || echo "   [warn] $n exited with an error; continuing"
   t1="$(date +%s.%N)"
   printf '{"name": "%s", "start": %s, "end": %s}\n' "$n" "$t0" "$t1" >> data/out/scenarios.jsonl
 done

@@ -1,9 +1,17 @@
-session       src_ip          port   fails cmds pkts  status
-------------------------------------------------------------
-973ffed62865  172.18.0.2      41592  0     0    6     matched
-ba4306292736  172.18.0.2      41602  0     0    22    matched
-ea9baf407d05  172.18.0.2      41610  0     0    23    matched
-47ea6d970770  172.18.0.2      41626  1     0    22    matched
-e93fb98b4723  172.18.0.2      41642  0     5    47    matched
+session       src_ip          port   fails cmds pkts  status     scenario
+-------------------------------------------------------------------------
+25e56e1e2a6c  172.18.0.2      57158  0     0    6     matched    -
+c3c29b1c936e  172.18.0.2      57164  0     0    24    matched    02_hydra_bruteforce.sh
+8f84d8ab232a  172.18.0.2      57180  0     0    23    matched    03_manual_ssh.sh
+ac51e239a7e2  172.18.0.2      57170  1     0    22    matched    03_manual_ssh.sh
+def8ceac04dc  172.18.0.2      57186  0     5    47    matched    03_manual_ssh.sh
 
-Summary: 5 matched, 0 partial, 0 unmatched  (1 older session(s) outside this pcap's time range were skipped)
+Summary: 5 matched, 0 partial, 0 unmatched  (6 older session(s) outside this pcap's time range were skipped)
+
+Per scenario:
+  02_hydra_bruteforce.sh     1 session(s): 1 matched, 0 partial, 0 unmatched; 0 command(s); 0 connection(s) with no Cowrie session
+  03_manual_ssh.sh           3 session(s): 3 matched, 0 partial, 0 unmatched; 5 command(s); 0 connection(s) with no Cowrie session
+  (not inside any scenario window: 1 session(s))
+
+Connections in the pcap with NO Cowrie session: 1  (for example port probes or scans that never completed an SSH handshake)
+  172.18.0.2:57150 -> :2222   2 packets, 140 bytes, 0.0 s

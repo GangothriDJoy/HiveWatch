@@ -174,6 +174,35 @@ def correlate(sessions, flows, window):
     return out, used
 
 
+def load_scenarios(path):
+    """data/out/scenarios.jsonl: one JSON object per line {name, start, end} (epoch seconds),
+    written by scripts/run_demo.sh around each attack scenario."""
+    out = []
+    if not path or not Path(path).is_file():
+        return out
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        try:
+            d = json.loads(line)
+            out.append({"name": d["name"], "start": float(d["start"]), "end": float(d["end"])})
+        except (ValueError, KeyError):
+            continue
+    return out
+
+
+def label_for(ts, scenarios, pad=0.25):
+    """Name of the scenario running at time ts, or '-'.
+    A window that really contains ts wins; padding is only a fallback."""
+    if ts is None:
+        return "-"
+    exact = [sc for sc in scenarios if sc["start"] <= ts <= sc["end"]]
+    if exact:
+        return max(exact, key=lambda sc: sc["start"])["name"]
+    near = [sc for sc in scenarios if sc["start"] - pad <= ts <= sc["end"] + pad]
+    if not near:
+        return "-"
+    return min(near, key=lambda sc: min(abs(ts - sc["start"]), abs(ts - sc["end"])))["name"]
+
+
 def pcap_only_flows(flows, used):
     """Connections to the honeypot port that appear in the pcap but have no Cowrie session
     (for example a port probe that never completed an SSH handshake)."""
@@ -205,13 +234,15 @@ def write_outputs(records, out_dir):
             w.writerow(row)
 
 
-def print_table(records):
-    hdr = f"{'session':<14}{'src_ip':<16}{'port':<7}{'fails':<6}{'cmds':<5}{'pkts':<6}{'status'}"
+def print_table(records, labels=None):
+    sc = "scenario" if labels else ""
+    hdr = f"{'session':<14}{'src_ip':<16}{'port':<7}{'fails':<6}{'cmds':<5}{'pkts':<6}{'status':<11}{sc}"
     print(hdr)
-    print("-" * len(hdr))
+    print("-" * max(len(hdr), 60))
     for r in records:
+        lab = labels.get(r["session_id"], "-") if labels else ""
         print(f"{str(r['session_id']):<14}{str(r['src_ip']):<16}{str(r['src_port']):<7}"
-              f"{r['failed_logins']:<6}{len(r['commands']):<5}{r['packets']:<6}{r['status']}")
+              f"{r['failed_logins']:<6}{len(r['commands']):<5}{r['packets']:<6}{r['status']:<11}{lab}")
 
 
 def main():
@@ -220,6 +251,8 @@ def main():
     ap.add_argument("--pcap", required=True, help="pcap file, or a folder (newest .pcap is used)")
     ap.add_argument("--out", default="data/out")
     ap.add_argument("--window", type=float, default=5.0, help="time window in seconds")
+    ap.add_argument("--scenarios", default=None,
+                    help="scenarios.jsonl from run_demo.sh; adds a scenario column and per-scenario counts")
     ap.add_argument("--all-sessions", action="store_true",
                     help="do not drop sessions outside the pcap time range")
     a = ap.parse_args()
@@ -236,11 +269,28 @@ def main():
     extra = pcap_only_flows(flows, used)
     write_outputs(records, a.out)
     Path(a.out, "pcap_only.json").write_text(json.dumps(extra, indent=2), encoding="utf-8")
-    print_table(records)
+    scen = load_scenarios(a.scenarios)
+    labels = {}
+    if scen:
+        for r in records:
+            labels[r["session_id"]] = label_for(parse_ts(r["start"]) if r["start"] else None, scen)
+    print_table(records, labels or None)
     counts = {k: sum(1 for r in records if r["status"] == k) for k in ("matched", "partial", "unmatched")}
     print(f"\nSummary: {counts['matched']} matched, {counts['partial']} partial, "
           f"{counts['unmatched']} unmatched"
           + (f"  ({skipped} older session(s) outside this pcap's time range were skipped)" if skipped else ""))
+    if scen:
+        print("\nPer scenario:")
+        for sc in scen:
+            mine = [r for r in records if labels.get(r["session_id"]) == sc["name"]]
+            odd = [e for e in extra if label_for(parse_ts(e["start"]), scen) == sc["name"]]
+            st = {k: sum(1 for r in mine if r["status"] == k) for k in ("matched", "partial", "unmatched")}
+            cmds = sum(len(r["commands"]) for r in mine)
+            print(f"  {sc['name']:<26} {len(mine)} session(s): {st['matched']} matched, {st['partial']} partial, "
+                  f"{st['unmatched']} unmatched; {cmds} command(s); {len(odd)} connection(s) with no Cowrie session")
+        none = [r for r in records if labels.get(r["session_id"]) == "-"]
+        if none:
+            print(f"  (not inside any scenario window: {len(none)} session(s))")
     if extra:
         print(f"\nConnections in the pcap with NO Cowrie session: {len(extra)}  "
               "(for example port probes or scans that never completed an SSH handshake)")

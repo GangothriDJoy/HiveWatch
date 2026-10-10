@@ -56,10 +56,14 @@ say "4/8  Run attack scenarios (from inside the lab network)"
 shopt -s nullglob
 scenarios=(attacker/scenarios/[0-9]*.sh)
 [ "${#scenarios[@]}" -gt 0 ] || die "no scenario scripts found in attacker/scenarios/"
+: > data/out/scenarios.jsonl     # start/end time of every scenario, so results can be labelled
 for s in "${scenarios[@]}"; do
   n="$(basename "$s")"
   echo "-- $n"
+  t0="$(date +%s.%N)"
   docker compose exec -T attacker "/scenarios/$n" || echo "   [warn] $n exited with an error; continuing"
+  t1="$(date +%s.%N)"
+  printf '{"name": "%s", "start": %s, "end": %s}\n' "$n" "$t0" "$t1" >> data/out/scenarios.jsonl
 done
 [ -f attacker/scenarios/01_nmap_scan.sh ] || skip "01_nmap_scan.sh not found yet (Member 2)"
 
@@ -80,7 +84,7 @@ if [ -x scripts/export_logs.sh ]; then scripts/export_logs.sh; else skip "script
 
 # ---- 7. Correlate -------------------------------------------------------------
 say "7/8  Correlate Cowrie sessions with packet flows"
-"$PY" correlator/correlate.py --log "$LOG" --pcap "$PCAP" --out data/out 2>&1 | tee data/out/session_table.txt
+"$PY" correlator/correlate.py --log "$LOG" --pcap "$PCAP" --out data/out --scenarios data/out/scenarios.jsonl 2>&1 | tee data/out/session_table.txt
 [ "${PIPESTATUS[0]}" -eq 0 ] || die "correlator failed"
 
 # ---- 8. Evidence --------------------------------------------------------------

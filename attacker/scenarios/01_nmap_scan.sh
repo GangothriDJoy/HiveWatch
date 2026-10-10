@@ -1,4 +1,4 @@
-nmap -n -sV -p 2222 cowrienmap -n -sV -p 2222 cowrie#!/usr/bin/env bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 # Label this scan, for example: before or after.

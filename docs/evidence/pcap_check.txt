@@ -1,0 +1,11 @@
+=== pcap check: data/pcap/hw-20261010-134028.pcap ===
+Size: 14848 bytes
+File opens cleanly: yes
+Packets in file: 49   (client -> honeypot: 28)
+Distinct client ports (= connections): 1
+Ports: 42720 
+--- comparing with Cowrie log: /tmp/cowrie-current-capture.json ---
+Cowrie sessions in log : 1
+Found in pcap          : 1
+Missing from pcap      : 0
+RESULT: PASS

@@ -42,22 +42,15 @@ Use `capture/check_pcap.sh data/pcap/<file>.pcap data/cowrie/cowrie.json` for th
 
 -
 
-## E. Standalone Member 4 test
-
-Date: 2026-10-09
-Environment: Docker, Cowrie, tcpdump, isolated hw-test network.
+## E. Compose integration test — 10 October 2026
 
 | Check | Result | Notes |
 |---|---|---|
-| Cowrie container starts | PASS | SSH service listening on port 2222 |
-| Capture container starts | PASS | tcpdump listening on eth0 |
-| Manual SSH scenario | PASS | Two successful sessions |
-| PCAP readable | PASS | 90 packets captured |
-| Cowrie sessions matched to PCAP | PASS | 2 of 2 found |
-| Missing sessions | PASS | 0 missing |
-| Packet loss | PASS | 0 packets dropped by kernel |
+| Cowrie, capture, and attacker started | PASS | All three containers running |
+| Manual SSH scenario | PASS | `ssh_exit=0`; commands executed |
+| Cowrie JSON logging | PASS | JSON session log generated |
+| PCAP capture and readability | PASS | 14,593 bytes; 47 packets |
+| Session-to-PCAP comparison | PASS | 1 session found; 0 missing |
+| Overall validation | PASS | `capture/check_pcap.sh` passed |
 
-Validation command:
-`bash capture/check_pcap.sh fixtures/real-sample/sample.pcap fixtures/real-sample/cowrie.json`
-
-Validation result: PASS.
+**Note:** Fixed client-port extraction in `capture/check_pcap.sh` to handle the `LINUX_SLL2` `tcpdump` output format.

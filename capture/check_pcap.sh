@@ -43,7 +43,7 @@ echo "Packets in file: $TOTAL   (client -> honeypot: $TO_HP)"
 
 TMP=$(mktemp)
 tcpdump -nn -r "$PCAP" "tcp dst port $PORT" 2>/dev/null \
-  | awk '{n=split($3,a,"."); print a[n]}' | sort -n | uniq > "$TMP"
+  | awk '{for(i=1;i<=NF;i++) if($i=="IP" || $i=="IP6") {n=split($(i+1),a,"."); print a[n]; exit}}' | sort -n | uniq > "$TMP"
 NPORTS=$(wc -l < "$TMP")
 echo "Distinct client ports (= connections): $NPORTS"
 echo "Ports: $(tr '\n' ' ' < "$TMP")"

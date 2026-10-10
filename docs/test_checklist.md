@@ -22,12 +22,12 @@ Use `capture/check_pcap.sh data/pcap/<file>.pcap data/cowrie/cowrie.json` for th
 
 | Scenario | Sessions in Cowrie log | Client ports in pcap | Missing from pcap | Packets dropped | Correlator: matched / partial / unmatched | Result | Notes |
 |---|---|---|---|---|---|---|---|
-| 01 Nmap scan | | | | | | | |
-| 02 Hydra brute force | | | | | | | |
-| 03 Manual SSH | | | | | | | |
+| 01 Nmap scan | 1 | 1 (port 50208) | 0 | 0 overall* | 1 matched / 0 partial / 0 unmatched | PASS | 10 Oct 2026, 13:16 UTC; SSH port 2222 found open |
+| 02 Hydra brute force | 3 | 3 (ports 50218, 50234, 50230) | 0 | 0 overall* | 3 matched / 0 partial / 0 unmatched | PASS | 10 Oct 2026, 13:16 UTC; hydra_exit=0 |
+| 03 Manual SSH | 1 | 1 (port 50248) | 0 | 0 overall* | 1 matched / 0 partial / 0 unmatched | PASS | 10 Oct 2026, 13:16 UTC; ssh_exit=0; 5 commands recorded |
 
+*Packet drops are reported for the capture as a whole, not separately per scenario. Capture logs reported 0 packets dropped by kernel. The full run had 1 additional matched session outside the three scenario windows and 2 captured connections without corresponding Cowrie sessions.
 ## C. Capture checks
-
 
 | Check | How to check | Result | Notes |
 |---|---|---|---|

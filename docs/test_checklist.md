@@ -28,13 +28,16 @@ Use `capture/check_pcap.sh data/pcap/<file>.pcap data/cowrie/cowrie.json` for th
 
 ## C. Capture checks
 
+
 | Check | How to check | Result | Notes |
 |---|---|---|---|
-| File name format | File is called `hw-YYYYMMDD-HHMMSS.pcap` in `data/pcap/` | | |
-| One new file per capture start | Start capture twice; two different files appear | | |
-| Clean stop | `docker compose stop capture`; `docker compose logs capture` shows "0 packets dropped by kernel"; file opens | | |
-| Only port 2222 recorded | `tcpdump -nn -r <file>` shows only port 2222 | | |
-| Survives a Cowrie restart | After `docker compose up -d --force-recreate cowrie`, a new SSH session appears in a pcap | | |
+| File name format | File is called `hw-YYYYMMDD-HHMMSS.pcap` in `data/pcap/` | PASS | 10 Oct 2026; timestamped filenames verified |
+| One new file per capture start | Start capture twice; two different files appear | PASS | 10 Oct 2026; new file `hw-20261010-133538.pcap` created without overwriting earlier files |
+| Clean stop | `docker compose stop capture`; `docker compose logs capture` shows "0 packets dropped by kernel"; file opens | PASS | 10 Oct 2026; capture logs showed 0 packets dropped by kernel; PCAP files opened successfully |
+| Only port 2222 recorded | `tcpdump -nn -r <file>` shows only port 2222 | PASS | 10 Oct 2026; filter `not tcp port 2222` returned no packet lines for `hw-20261010-131606.pcap` |
+| Survives a Cowrie restart | After restarting Cowrie, a new SSH session appears in a pcap | PASS | 10 Oct 2026; after Cowrie restart, manual SSH succeeded and `hw-20261010-134028.pcap` contained readable TCP traffic on port 2222 |
+
+
 
 ## D. Known limits found during testing
 

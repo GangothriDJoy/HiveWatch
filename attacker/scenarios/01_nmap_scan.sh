@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+nmap -n -sV -p 2222 cowrienmap -n -sV -p 2222 cowrie#!/usr/bin/env bash
 set -euo pipefail
 
 # Label this scan, for example: before or after.
@@ -19,5 +19,5 @@ mkdir -p "$EVIDENCE_DIR"
     echo "Target: 127.0.0.1, port 2222"
     echo "========================================"
 
-    nmap -sV -p 2222 127.0.0.1
+    nmap -n -sV -p 2222 cowrie
 } 2>&1 | tee -a "$OUTPUT_FILE"

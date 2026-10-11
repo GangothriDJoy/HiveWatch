@@ -188,3 +188,18 @@ Generated logs, PCAP files, `.env`, and virtual environments should remain untra
 ## Current implementation scope
 
 The current lab supports Cowrie SSH session logging, packet capture on TCP port 2222, a controlled Hydra test scenario, and a log-export helper. Additional components should be integrated according to the team's parallel build plan and integration contracts.
+
+### Cowrie Log Directory Permissions
+
+Cowrie runs as UID 999 inside the container. The host-mounted `data/cowrie/` directory must be writable by that user so Cowrie can create and update its JSON event log.
+
+The demo script applies `chmod 777 data/cowrie` to avoid permission problems on common lab setups. This grants all local users read, write, and execute permissions on that directory, so use it only in a trusted project workspace.
+
+Where possible, prefer assigning ownership to the Cowrie container user and granting write access to the owner and group:
+
+```bash
+sudo chown -R 999:999 data/cowrie
+sudo chmod -R u+rwX,g+rwX data/cowrie
+```
+
+If the log remains empty or Cowrie cannot write to the mounted directory, check the directory ownership and permissions before rerunning the demo.
